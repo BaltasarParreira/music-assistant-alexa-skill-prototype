@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
-"""Sync addons/music-assistant-skill/config.json version with the top-level VERSION file.
+"""Sync addons/music-assistant-skill/config.yaml version with the top-level VERSION file.
 
 Usage: ./scripts/sync_version.py
 """
-import json
 from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 VERSION_FILE = ROOT / 'VERSION'
-CONFIG = ROOT / 'addons' / 'music-assistant-skill' / 'config.json'
+CONFIG = ROOT / 'addons' / 'music-assistant-skill' / 'config.yaml'
 
 
 def read_version():
@@ -27,17 +26,27 @@ def read_version():
 def sync():
     ver = read_version()
     if not CONFIG.exists():
-        raise SystemExit(f"config.json not found at {CONFIG}")
+        raise SystemExit(f"config.yaml not found at {CONFIG}")
 
-    data = json.loads(CONFIG.read_text(encoding='utf-8'))
-    old = data.get('version')
+    lines = CONFIG.read_text(encoding='utf-8').splitlines()
+    old = None
+    updated = False
+    for i, line in enumerate(lines):
+        if line.strip().startswith('version:'):
+            old = line.split(':', 1)[1].strip().strip('"').strip("'")
+            lines[i] = f'version: "{ver}"'
+            updated = True
+            break
+
+    if not updated:
+        raise SystemExit("version field not found in config.yaml")
+
     if old == ver:
-        print(f"config.json already at version {ver}")
+        print(f"config.yaml already at version {ver}")
         return 0
 
-    data['version'] = ver
-    CONFIG.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding='utf-8')
-    print(f"Updated config.json version: {old} -> {ver}")
+    CONFIG.write_text("\n".join(lines) + "\n", encoding='utf-8')
+    print(f"Updated config.yaml version: {old} -> {ver}")
     return 0
 
 

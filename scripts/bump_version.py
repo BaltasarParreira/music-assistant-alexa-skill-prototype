@@ -4,7 +4,7 @@
 Behavior:
 - Parse VERSION as MAJOR.MINOR.PATCH plus optional suffix (e.g. -beta) and increment PATCH.
 - Preserve any suffix when bumping (e.g. 0.0.2-beta -> 0.0.3-beta).
-- Run `scripts/sync_version.py` to keep `addons/.../config.json` in sync.
+- Run `scripts/sync_version.py` to keep `addons/.../config.yaml` in sync.
 - Stage updated files (`git add`) so the commit includes the change.
 
 This script is intended to be run from a repo-local pre-commit hook so version
@@ -105,13 +105,13 @@ def main():
         print(f'Version unchanged: {cur}')
         return 0
 
-    # Update VERSION and sync config.json
+    # Update VERSION and sync config.yaml
     write_version(new)
     print(f'Bumped VERSION: {cur} -> {new}')
     run_sync()
 
     # Stage the updated files so the user's commit includes them automatically
-    addon_cfg = ROOT / 'addons' / 'music-assistant-skill' / 'config.json'
+    addon_cfg = ROOT / 'addons' / 'music-assistant-skill' / 'config.yaml'
     to_stage = [VERSION_FILE]
     if addon_cfg.exists():
         to_stage.append(addon_cfg)
